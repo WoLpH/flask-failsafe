@@ -5,7 +5,10 @@ import traceback
 import flask
 
 
-PY2 = sys.version_info[0] == 2
+if sys.version_info[0] == 2:
+  from py2 import reraise
+else:
+  from py3 import reraise
 
 
 def failsafe(func, config=dict()):
@@ -53,16 +56,6 @@ def failsafe(func, config=dict()):
     return app
 
   return wrapper
-
-
-if PY2:
-  def reraise(tp, value, tb=None):
-    raise tp, value, tb
-else:
-  def reraise(tp, value, tb=None):
-    if value.__traceback__ is not tb:
-      raise value.with_traceback(tb)
-    raise value
 
 
 class _FailSafeFlask(flask.Flask):
