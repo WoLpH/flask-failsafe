@@ -8,7 +8,7 @@ import flask
 PY2 = sys.version_info[0] == 2
 
 
-def failsafe(func):
+def failsafe(func, config=dict()):
   """
   Wraps an app factory to provide a fallback in case of import errors.
 
@@ -24,9 +24,10 @@ def failsafe(func):
   @functools.wraps(func)
   def wrapper(*args, **kwargs):
     extra_files = []
-
     try:
-      return func(*args, **kwargs)
+      app = func(*args, **kwargs)
+      config.update(app.config.items())
+      return app
     except:
       exc_type, exc_val, exc_tb = sys.exc_info()
       traceback.print_exc()
@@ -41,6 +42,7 @@ def failsafe(func):
       extra_files.append(exc_val.filename)
 
     app = _FailSafeFlask(extra_files)
+    app.config.update(config)
     app.debug = True
 
     @app.route('/')
@@ -54,7 +56,8 @@ def failsafe(func):
 
 
 if PY2:
-  exec('def reraise(tp, value, tb=None):\n raise tp, value, tb')
+  def reraise(tp, value, tb=None):
+    raise tp, value, tb
 else:
   def reraise(tp, value, tb=None):
     if value.__traceback__ is not tb:
@@ -78,3 +81,7 @@ class _FailSafeFlask(flask.Flask):
       extra_files = extra_files + kwargs['extra_files']
     kwargs['extra_files'] = extra_files
     flask.Flask.run(self, *args, **kwargs)
+
+# Modeline parameters for Vim since this script uses non-pep8-compliant
+# indenting
+# vim: set ts=2 sw=2 :
