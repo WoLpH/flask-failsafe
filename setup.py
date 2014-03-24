@@ -23,7 +23,7 @@ setup(
   long_description=README + '\n\n' + CHANGES,
   zip_safe=True,
   platforms='any',
-  py_modules=['flask_failsafe'],
+  py_modules=['flask_failsafe', 'py2', 'py3'],
   install_requires=[
     'Flask>=0.8',
   ],
